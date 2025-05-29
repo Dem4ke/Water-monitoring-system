@@ -1,0 +1,18 @@
+# This file is used to ignore files which are generated
+# ----------------------------------------------------------------------------
+
+# qtcreator generated files
+CMakeLists.txt.user*
+
+# Binaries
+# --------
+*.dll
+*.qm
+*.exe
+
+# Directories with generated files
+*/build*/
+
+#Diagrams of the project
+Diagrams/*.bkp
+Diagrams/*.btmp
