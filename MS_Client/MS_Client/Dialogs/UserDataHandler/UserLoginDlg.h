@@ -9,12 +9,13 @@ class UserLoginDlg;
 QT_END_NAMESPACE
 
 namespace MS {
-class UserLoginDlg : public QWidget
-{
+class SocketComponent;
+
+class UserLoginDlg : public QWidget {
     Q_OBJECT
 
 public:
-    UserLoginDlg(QWidget *parent = nullptr);
+    UserLoginDlg(QWidget* parent = nullptr);
     ~UserLoginDlg();
 
 private slots:
@@ -22,6 +23,8 @@ private slots:
     void on_create_account_button_clicked();
 
 private:
-    Ui::UserLoginDlg *ui;
+    Ui::UserLoginDlg* ui_;                                          // User interface
+
+    std::shared_ptr<SocketComponent> socketComponent_ = nullptr;    // Pointer to the component that contains TCP socket
 };
 }

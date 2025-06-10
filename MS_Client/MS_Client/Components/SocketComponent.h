@@ -28,10 +28,8 @@ public slots:
     void slotReadyRead();
     void sendToServer(DataType dataType, QVector<QString> output);
 
-private:
-
-
 signals:
+
 
 private:
     QTcpSocket* socket_ = nullptr;      // Socket which uses to work with server

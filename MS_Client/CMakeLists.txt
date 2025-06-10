@@ -22,6 +22,7 @@ qt_add_executable(MS_Client
     MS_Client/Components/LanguageComponent.h
     MS_Client/Components/LanguageComponent.cpp
     MS_Client/Components/SocketComponent.h MS_Client/Components/SocketComponent.cpp
+    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.h MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.ui
 )
 
 qt_add_translations(

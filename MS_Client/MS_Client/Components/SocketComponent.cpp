@@ -4,7 +4,14 @@
 
 namespace MS {
 SocketComponent::SocketComponent(QObject* parent)
-    : QObject{parent} {}
+    : QObject{parent} {
+
+    // Connect socket to server
+    socket_ = new QTcpSocket(this);
+
+    connect(socket_, &QTcpSocket::disconnected, socket_, &QTcpSocket::deleteLater);
+    socket_->connectToHost("127.0.0.1", 2323);
+}
 
 // Handler of a server's messages
 void SocketComponent::slotReadyRead() {
