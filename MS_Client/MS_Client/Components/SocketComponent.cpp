@@ -2,7 +2,7 @@
 
 #include <QMessageBox>
 
-namespace MS {
+namespace Component {
 SocketComponent::SocketComponent(QObject* parent)
     : QObject{parent} {
 
@@ -11,6 +11,17 @@ SocketComponent::SocketComponent(QObject* parent)
 
     connect(socket_, &QTcpSocket::disconnected, socket_, &QTcpSocket::deleteLater);
     socket_->connectToHost("127.0.0.1", 2323);
+}
+
+// Get Instance of the socket
+SocketComponent &SocketComponent::Instance() {
+    static SocketComponent socketComponent(nullptr);
+    return socketComponent;
+}
+
+// Send to server info about user and request an answer
+void SocketComponent::checkUserStatement(QVector<QString> info) {
+    sendToServer(ServerActionType::CheckUserStatement, info);
 }
 
 // Handler of a server's messages
@@ -37,16 +48,24 @@ void SocketComponent::slotReadyRead() {
 
             // Write data from server
             QVector<QString> info;
-            int flag;
+            int actionType;
 
-            input >> flag >> info;
+            input >> actionType>> info;
 
-            if (flag == 2) {
-                if (info[0] == "denied") {
-                    QMessageBox::warning(nullptr, "Denied","Login or password is wrong");
+            if (static_cast<ServerActionType>(actionType) == ServerActionType::AddNewUser ||
+                static_cast<ServerActionType>(actionType) == ServerActionType::CheckUserStatement) {
+
+                if (info.isEmpty()) {
+                    break;
                 }
-                else if (info[0] == "success") {
+
+                bool isLogAvalible = false;
+
+                if (info[0] == "1") {
+                    isLogAvalible = true;
                 }
+
+                emit getUserStatus(isLogAvalible);
             }
 
             blockSize_ = 0;
@@ -55,14 +74,14 @@ void SocketComponent::slotReadyRead() {
     }
 }
 
-void SocketComponent::sendToServer(DataType dataType, QVector<QString> output) {
+void SocketComponent::sendToServer(ServerActionType actionType, QVector<QString> output) {
     data_.clear();
 
     QDataStream out(&data_, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_7);
+    out.setVersion(QDataStream::Qt_6_8);
 
     // Calculate and write a size of the sent data package
-    out << quint16(0) << dataType << output;
+    out << quint16(0) << static_cast<int>(actionType) << output;
     out.device()->seek(0);
     out << quint16(data_.size() - sizeof(quint16));
 

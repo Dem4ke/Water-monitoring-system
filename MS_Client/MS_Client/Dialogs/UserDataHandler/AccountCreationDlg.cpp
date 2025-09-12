@@ -1,21 +1,38 @@
 #include "AccountCreationDlg.h"
 #include "ui_AccountCreationDlg.h"
+#include "../../Components/SocketComponent.h"
 
-namespace MS {
-AccountCreationDlg::AccountCreationDlg(QWidget *parent)
+#include <QMessageBox>
+
+namespace Dialog {
+AccountCreationDlg::AccountCreationDlg(QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::AccountCreationDlg)
-{
-    ui->setupUi(this);
+    , ui_(new Ui::AccountCreationDlg) {
+
+    ui_->setupUi(this);
 }
 
-AccountCreationDlg::~AccountCreationDlg()
-{
-    delete ui;
+AccountCreationDlg::~AccountCreationDlg() {
+    delete ui_;
 }
 
-void AccountCreationDlg::on_create_account_button_clicked()
-{
+void AccountCreationDlg::checkUserStatus(bool isLogAvalible) {
+    if (isLogAvalible) {
+        emit accountCreated(true);
+    }
+    else {
+        QMessageBox::warning(this, QObject::tr("Denied"), QObject::tr("User with the same login exists"));
+    }
+}
 
+void AccountCreationDlg::on_create_account_button_clicked() {
+    QVector<QString> userInfo;
+    userInfo.push_back(ui_->user_login->text());
+    userInfo.push_back(ui_->user_password->text());
+    userInfo.push_back(ui_->user_email->text());
+
+    connect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
+    Component::SOCKET.addUser(userInfo);
+    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
 }
 }
