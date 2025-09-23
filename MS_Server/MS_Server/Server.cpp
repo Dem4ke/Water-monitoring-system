@@ -14,19 +14,19 @@ Server::Server() {
 // Create connection with database
 bool Server::connectToDatabase() {
     // Database which contains all information about users and waters
-    QSqlDatabase watersBD = QSqlDatabase::addDatabase("QPSQL");
-    watersBD.setDatabaseName("MS_Data");
-    watersBD.setUserName("postgres");
-    watersBD.setPassword("1337");
+    QSqlDatabase MSDB = QSqlDatabase::addDatabase("QPSQL");
+    MSDB.setDatabaseName("MS_DataBase");
+    MSDB.setUserName("postgres");
+    MSDB.setPassword("1337");
 
-    if (!watersBD.open()) {
-        QSqlError error = watersBD.lastError();
+    if (!MSDB.open()) {
+        QSqlError error = MSDB.lastError();
         qCritical() << "waters database error" << error.text();
         return false;
     }
 
-    watersBD.tables(QSql::AllTables);
-    qCritical() << "Database opened, tables:" << watersBD.tables(QSql::Tables);
+    MSDB.tables(QSql::AllTables);
+    qCritical() << "Database opened, tables:" << MSDB.tables(QSql::Tables);
     return true;
 }
 
