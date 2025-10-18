@@ -40,13 +40,23 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="28"/>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="31"/>
         <source>Such user doesn&apos;t exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="28"/>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="31"/>
         <source>Incorrect login or password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp" line="28"/>
+        <source>Denied</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp" line="28"/>
+        <source>User with the same login exists</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

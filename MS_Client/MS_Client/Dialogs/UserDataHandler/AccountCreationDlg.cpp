@@ -17,8 +17,12 @@ AccountCreationDlg::~AccountCreationDlg() {
 }
 
 void AccountCreationDlg::checkUserStatus(bool isLogAvalible) {
+    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
+
     if (isLogAvalible) {
         emit accountCreated(true);
+
+        this->close();
     }
     else {
         QMessageBox::warning(this, QObject::tr("Denied"), QObject::tr("User with the same login exists"));
@@ -33,6 +37,5 @@ void AccountCreationDlg::on_create_account_button_clicked() {
 
     connect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
     Component::SOCKET.addUser(userInfo);
-    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
 }
 }

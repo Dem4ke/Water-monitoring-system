@@ -10,6 +10,7 @@ namespace Dialog {
 UserLoginDlg::UserLoginDlg(QWidget* parent)
     : QWidget(parent)
     , ui_(new Ui::UserLoginDlg) {
+
     ui_->setupUi(this);
 }
 
@@ -18,6 +19,8 @@ UserLoginDlg::~UserLoginDlg() {
 }
 
 void UserLoginDlg::checkUserStatus(bool isLogAvalible) {
+    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &UserLoginDlg::checkUserStatus);
+
     if (isLogAvalible) {
         this->hide();
 
@@ -36,16 +39,13 @@ void UserLoginDlg::on_sign_in_button_clicked() {
 
     connect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &UserLoginDlg::checkUserStatus);
     Component::SOCKET.checkUserStatement(userInfo);
-    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &UserLoginDlg::checkUserStatus);
 }
 
 void UserLoginDlg::on_create_account_button_clicked() {
-    this->hide();
-
     AccountCreationDlg* accountCreationDlg = new AccountCreationDlg(this);
     connect(accountCreationDlg, &AccountCreationDlg::accountCreated, this, &UserLoginDlg::checkUserStatus);
-    connect(accountCreationDlg, &AccountCreationDlg::finished, accountCreationDlg, &AccountCreationDlg::deleteLater);
 
     accountCreationDlg->exec();
+    delete accountCreationDlg;
 }
 }

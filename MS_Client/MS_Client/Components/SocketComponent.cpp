@@ -9,6 +9,7 @@ SocketComponent::SocketComponent(QObject* parent)
     // Connect socket to server
     socket_ = new QTcpSocket(this);
 
+    connect(socket_, &QTcpSocket::readyRead, this, &SocketComponent::slotReadyRead);
     connect(socket_, &QTcpSocket::disconnected, socket_, &QTcpSocket::deleteLater);
     socket_->connectToHost("127.0.0.1", 2323);
 }
@@ -22,6 +23,11 @@ SocketComponent &SocketComponent::Instance() {
 // Send to server info about user and request an answer
 void SocketComponent::checkUserStatement(QVector<QString> info) {
     sendToServer(ServerActionType::CheckUserStatement, info);
+}
+
+// Send to server info about user and request to add it into database
+void SocketComponent::addUser(QVector<QString> info) {
+    sendToServer(ServerActionType::AddNewUser, info);
 }
 
 // Handler of a server's messages
@@ -48,12 +54,12 @@ void SocketComponent::slotReadyRead() {
 
             // Write data from server
             QVector<QString> info;
-            int actionType;
+            ServerActionType actionType;
 
             input >> actionType>> info;
 
-            if (static_cast<ServerActionType>(actionType) == ServerActionType::AddNewUser ||
-                static_cast<ServerActionType>(actionType) == ServerActionType::CheckUserStatement) {
+            if (actionType == ServerActionType::AddNewUser ||
+                actionType == ServerActionType::CheckUserStatement) {
 
                 if (info.isEmpty()) {
                     break;
@@ -81,7 +87,7 @@ void SocketComponent::sendToServer(ServerActionType actionType, QVector<QString>
     out.setVersion(QDataStream::Qt_6_8);
 
     // Calculate and write a size of the sent data package
-    out << quint16(0) << static_cast<int>(actionType) << output;
+    out << quint16(0) << actionType << output;
     out.device()->seek(0);
     out << quint16(data_.size() - sizeof(quint16));
 

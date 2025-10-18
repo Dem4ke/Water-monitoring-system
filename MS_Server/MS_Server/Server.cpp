@@ -32,13 +32,13 @@ bool Server::connectToDatabase() {
 
 // Handler of a new connections
 void Server::incomingConnection(qintptr socketDescriptor) {
-    socket_ = new QTcpSocket();
-    socket_->setSocketDescriptor(socketDescriptor);
+    QTcpSocket* socket = new QTcpSocket();
+    socket->setSocketDescriptor(socketDescriptor);
 
     //connect(socket, SIGNAL(readyRead()), this, SLOT(slotReadyRead()));
-    connect(socket_, &QTcpSocket::readyRead, this, &MS::Server::slotReadyRead);
+    connect(socket, &QTcpSocket::readyRead, this, &MS::Server::slotReadyRead);
 
-    sockets_.push_back(socket_);
+    sockets_.push_back(socket);
 
     qDebug() << "client connected: " << socketDescriptor;
 }
@@ -46,24 +46,24 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 // Handler of a client's disconnection
 void Server::clienDisconnected() {
     // The socket which sent a request
-    socket_ = (QTcpSocket*)sender();
+    QTcpSocket* socket = (QTcpSocket*)sender();
 
     // Delete socket of a client which left
-    sockets_.erase(std::remove(sockets_.begin(), sockets_.end(), socket_), sockets_.end());
-    socket_->deleteLater();
+    sockets_.erase(std::remove(sockets_.begin(), sockets_.end(), socket), sockets_.end());
+    socket->deleteLater();
 }
 
 // Handler of a client's messages
 void Server::slotReadyRead() {
-    socket_ = (QTcpSocket*)sender();
-    QDataStream input(socket_);
+    QTcpSocket* socket = (QTcpSocket*)sender();
+    QDataStream input(socket);
 
-    input.setVersion(QDataStream::Qt_6_7);
+    input.setVersion(QDataStream::Qt_6_8);
     if (input.status() == QDataStream::Ok) {
         while(true) {
             // Calculate size of the block of data
             if (blockSize_ == 0) {
-                if (socket_->bytesAvailable() < 2) {
+                if (socket->bytesAvailable() < 2) {
                     break;
                 }
 
@@ -72,32 +72,25 @@ void Server::slotReadyRead() {
             }
 
             // If the block size is bigger than data from client, we should wait to other data
-            if (socket_->bytesAvailable() < blockSize_) {
+            if (socket->bytesAvailable() < blockSize_) {
                 qDebug() << "data not full, break";
                 break;
             }
 
             // Write data from user
             QVector<QString> info;
-            int flag;
+            ServerActionType actionType;
 
-            input >> flag >> info;
+            input >> actionType >> info;
 
-            switch (flag) {
-            case 1: {
+
+            switch (actionType) {
+            case ServerActionType::AddNewUser: {
                 addUser(info);
                 break;
             }
-            case 2: {
+            case ServerActionType::CheckUserStatement: {
                 checkUserStatement(info);
-                break;
-            }
-            case 3: {
-                getWatersNames();
-                break;
-            }
-            case 4: {
-                getWaterInfo(info);
                 break;
             }
             }
@@ -111,14 +104,14 @@ void Server::slotReadyRead() {
     }
 }
 
-void Server::sendToClient(int flag, QVector<QString> output) {
+void Server::sendToClient(ServerActionType actionType, QVector<QString> output) {
     data_.clear();
 
     QDataStream out(&data_, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_7);
+    out.setVersion(QDataStream::Qt_6_8);
 
     // Calculate and write a size of the sent data package
-    out << quint16(0) << flag << output;
+    out << quint16(0) << actionType << output;
     out.device()->seek(0);
     out << quint16(data_.size() - sizeof(quint16));
 
@@ -146,10 +139,10 @@ void Server::addUser(QVector<QString> userInfo) {
     }
 
     if (isUserExists) {
-        answerToClient.push_back("denied");
+        answerToClient.push_back("0");
     }
     else {
-        answerToClient.push_back("success");
+        answerToClient.push_back("1");
 
         QString insertInDB = "INSERT INTO users (user_login, user_password, user_email) VALUES ('" +
                              userInfo[0] + "', '" + userInfo[1] + "', '" + userInfo[2] + "');";
@@ -157,11 +150,11 @@ void Server::addUser(QVector<QString> userInfo) {
         query.exec(insertInDB);
     }
 
-    sendToClient(1, answerToClient);
+    sendToClient(ServerActionType::AddNewUser, answerToClient);
 }
 
 
-// Checks is user exists and entered password is right
+// Checks is user exists and entered password was right
 void Server::checkUserStatement(QVector<QString> userInfo) {
     QVector<QString> answerToClient;
 
@@ -180,13 +173,13 @@ void Server::checkUserStatement(QVector<QString> userInfo) {
     }
 
     if (isUserExists) {
-        answerToClient.push_back("success");
+        answerToClient.push_back("1");
     }
     else {
-        answerToClient.push_back("denied");
+        answerToClient.push_back("0");
     }
 
-    sendToClient(2, answerToClient);
+    sendToClient(ServerActionType::CheckUserStatement, answerToClient);
 }
 
 void Server::getWatersNames() {
@@ -200,7 +193,7 @@ void Server::getWatersNames() {
         answerToClient.push_back(waterName);
     }
 
-    sendToClient(3, answerToClient);
+    //sendToClient(3, answerToClient);
 }
 
 void Server::getWaterInfo(QVector<QString> waterName) {
@@ -244,6 +237,6 @@ void Server::getWaterInfo(QVector<QString> waterName) {
         answerToClient.push_back(waterLevel);
     }
 
-    sendToClient(4, answerToClient);
+    //sendToClient(4, answerToClient);
 }
 }
