@@ -10,6 +10,8 @@ CMakeLists.txt.user*
 *.qm
 *.exe
 
+#SQL Libs that needed to server's work
+!MS_Server/SQL_Libs/*.dll
 # Directories with generated files
 */build*/
 

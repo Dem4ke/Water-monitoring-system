@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.19)
 project(MS_Client LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets LinguistTools Network)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets LinguistTools Network
+    QuickWidgets Quick Location Positioning)
 
-qt_standard_project_setup()
+qt_standard_project_setup(REQUIRES 6.8)
 
 set(app_icon "Resources/MS_Client.rc")
 
@@ -30,6 +31,12 @@ qt_add_executable(MS_Client
     MS_Client/MainWindow.h MS_Client/MainWindow.cpp MS_Client/MainWindow.ui
 )
 
+qt_add_qml_module(MS_Client
+    URI MS_Client_Map
+    VERSION 1.0
+    QML_FILES QML/Map.qml
+)
+
 qt_add_translations(
     TARGETS MS_Client
     TS_FILES Languages/MS_Client_ru_RU.ts
@@ -47,6 +54,10 @@ target_link_libraries(MS_Client
         Qt6::Core
         Qt6::Widgets
         Qt6::Network
+        Qt6::Quick
+        Qt6::QuickWidgets
+        Qt6::Location
+        Qt6::Positioning
 )
 
 include(GNUInstallDirs)

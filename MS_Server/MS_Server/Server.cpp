@@ -128,10 +128,10 @@ void Server::addUser(QVector<QString> userInfo) {
     // Check is user with the same login exists
     bool isUserExists = false;
     QSqlQuery query;
-    query.exec("SELECT * FROM users");
+    query.exec("SELECT * FROM Users");
 
     while (query.next()) {
-        QString dbLogin = query.value("user_login").toString();
+        QString dbLogin = query.value("login").toString();
 
         if (userInfo[0] == dbLogin) {
             isUserExists = true;
@@ -144,7 +144,7 @@ void Server::addUser(QVector<QString> userInfo) {
     else {
         answerToClient.push_back("1");
 
-        QString insertInDB = "INSERT INTO users (user_login, user_password, user_email) VALUES ('" +
+        QString insertInDB = "INSERT INTO public.Users (login, password, email) VALUES ('" +
                              userInfo[0] + "', '" + userInfo[1] + "', '" + userInfo[2] + "');";
 
         query.exec(insertInDB);
@@ -161,11 +161,11 @@ void Server::checkUserStatement(QVector<QString> userInfo) {
     // Check is user with the same login and pasword exists
     bool isUserExists = false;
     QSqlQuery query;
-    query.exec("SELECT * FROM users");
+    query.exec("SELECT * FROM public.Users");
 
     while (query.next()) {
-        QString dbLogin = query.value("user_login").toString();
-        QString dbPassword = query.value("user_password").toString();
+        QString dbLogin = query.value("login").toString();
+        QString dbPassword = query.value("password").toString();
 
         if (userInfo[0] == dbLogin && userInfo[1] == dbPassword) {
             isUserExists = true;
