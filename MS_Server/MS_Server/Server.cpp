@@ -144,7 +144,7 @@ void Server::addUser(QVector<QString> userInfo) {
     else {
         answerToClient.push_back("1");
 
-        QString insertInDB = "INSERT INTO public.Users (login, password, email) VALUES ('" +
+        QString insertInDB = "INSERT INTO public.\"Users\" (login, password, email) VALUES ('" +
                              userInfo[0] + "', '" + userInfo[1] + "', '" + userInfo[2] + "');";
 
         query.exec(insertInDB);
