@@ -41,12 +41,12 @@
    <item row="2" column="0">
     <widget class="QLabel" name="label_5">
      <property name="text">
-      <string>E-mail</string>
+      <string>Vessel's name</string>
      </property>
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QLineEdit" name="user_email"/>
+    <widget class="QLineEdit" name="vessel_name"/>
    </item>
    <item row="3" column="0" colspan="2">
     <widget class="QPushButton" name="create_account_button">

@@ -7,8 +7,7 @@ class AccountCreationDlg;
 }
 
 namespace Dialog {
-class AccountCreationDlg : public QDialog
-{
+class AccountCreationDlg : public QDialog {
     Q_OBJECT
 
 public:

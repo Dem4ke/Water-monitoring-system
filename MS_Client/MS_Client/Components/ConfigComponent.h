@@ -1,29 +1,23 @@
 #pragma once
 
 #include <QString>
-#include <QColor>
-#include <QMap>
 
 namespace Component {
-// Класс для конфигурирования проекта под пользовательские настройки
+// Class for configuring application by the user's choices
 class ConfigComponent {
 public:
     static ConfigComponent& Instance();
 
     void serialize();
 
-    void setOutputType(int outputType);
-    int getOutputType() const;
-
-    void setOutputOpenFlag(bool isNeedToOpen);
-    bool isOutputNeedToOpen() const;
+    void setSearchRadius(float radius);
+    int getSearchRadius() const;
 
     void setCurrentLanguage(int languageIndex);
     int getCurrentLanguage() const;
 
-    void setColors(const QMap<QString, QColor>& colors);
-    const QMap<QString, QColor>& getColors();
-    const QColor& getColor(const QString& name);
+    void setVesselMonSysIndex();
+    int getVesselMonSysIndex() const;
 
 private:
     ConfigComponent();
@@ -31,13 +25,10 @@ private:
 
     void initializeDefault();
 
-    const QString path_ = "Config/User.conf";   // Путь до файла с конфигом
-
-    int outputType_ = 0;                        // Тип файла для рассчитанных значений
-    bool isOutputNeedToOpen_ = true;            // Флаг, показатель нужно ли открыть файл с расчетом
-
-    int languageIndex_ = 0;                     // Индекс выбранного пользователем языка
-    QMap<QString, QColor> colors_;              // Цвета, настраиваемые в диалоге настроек
+    const QString path_ = "Config/User.conf";   // Path to the configuration file
+    int languageIndex_ = 0;                     // Index of current language used by the application
+    int vesselMonSysIndex_ = 0;                 // Index of vessel's monitoring system in use
+    float searchRadius_ = 100.f;                // Radius that used to find nearest vessels in kilometres
 };
 
 #define CONFIG ConfigComponent::Instance()

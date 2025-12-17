@@ -1,8 +1,12 @@
 cmake_minimum_required(VERSION 3.19)
 project(MS_Client LANGUAGES CXX)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets LinguistTools Network
-    QuickWidgets Quick Location Positioning)
+    QuickWidgets Quick Location Positioning Charts)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -13,10 +17,24 @@ qt_add_executable(MS_Client
     ${app_icon}
 
     MS_Client/main.cpp
+    MS_Client/MainWindow.h
+    MS_Client/MainWindow.cpp
+    MS_Client/MainWindow.ui
 
     MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp
     MS_Client/Dialogs/UserDataHandler/UserLoginDlg.h
     MS_Client/Dialogs/UserDataHandler/UserLoginDlg.ui
+    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.h
+    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp
+    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.ui
+
+    MS_Client/Project/IProject.h
+    MS_Client/Project/Project.h
+    MS_Client/Project/Project.cpp
+
+    MS_Client/VesselAPI/VesselAPI.h
+    MS_Client/VesselAPI/NMEA2000VesselAPI.h
+    MS_Client/VesselAPI/NMEA2000VesselAPI.cpp
 
     MS_Client/Components/ConfigComponent.h
     MS_Client/Components/ConfigComponent.cpp
@@ -24,17 +42,16 @@ qt_add_executable(MS_Client
     MS_Client/Components/LanguageComponent.cpp
     MS_Client/Components/SocketComponent.h
     MS_Client/Components/SocketComponent.cpp
-
-    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.h
-    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp
-    MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.ui
-    MS_Client/MainWindow.h MS_Client/MainWindow.cpp MS_Client/MainWindow.ui
+    MS_Client/Components/ProjectComponent.h
+    MS_Client/Components/ProjectComponent.cpp
 )
 
 qt_add_qml_module(MS_Client
-    URI MS_Client_Map
+    URI MS_Client_QML
     VERSION 1.0
     QML_FILES QML/Map.qml
+    QML_FILES QML/Plot.qml
+    SOURCES MS_Client/VesselAPI/VesselAPIFactory.h MS_Client/VesselAPI/VesselAPIFactory.cpp
 )
 
 qt_add_translations(
@@ -58,7 +75,9 @@ target_link_libraries(MS_Client
         Qt6::QuickWidgets
         Qt6::Location
         Qt6::Positioning
+        Qt6::Charts
 )
+target_link_libraries(MS_Client PRIVATE Qt6::Core)
 
 include(GNUInstallDirs)
 

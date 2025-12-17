@@ -46,7 +46,7 @@ void Server::incomingConnection(qintptr socketDescriptor) {
 // Handler of a client's disconnection
 void Server::clienDisconnected() {
     // The socket which sent a request
-    QTcpSocket* socket = (QTcpSocket*)sender();
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
 
     // Delete socket of a client which left
     sockets_.erase(std::remove(sockets_.begin(), sockets_.end(), socket), sockets_.end());
@@ -55,10 +55,15 @@ void Server::clienDisconnected() {
 
 // Handler of a client's messages
 void Server::slotReadyRead() {
-    QTcpSocket* socket = (QTcpSocket*)sender();
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
+
+    if (!socket) {
+        return;
+    }
+
     QDataStream input(socket);
 
-    input.setVersion(QDataStream::Qt_6_8);
+    input.setVersion(QDataStream::Qt_6_10);
     if (input.status() == QDataStream::Ok) {
         while(true) {
             // Calculate size of the block of data
@@ -83,17 +88,7 @@ void Server::slotReadyRead() {
 
             input >> actionType >> info;
 
-
-            switch (actionType) {
-            case ServerActionType::AddNewUser: {
-                addUser(info);
-                break;
-            }
-            case ServerActionType::CheckUserStatement: {
-                checkUserStatement(info);
-                break;
-            }
-            }
+            dataBaseRequest(actionType, info);
 
             blockSize_ = 0;
             break;
@@ -104,11 +99,42 @@ void Server::slotReadyRead() {
     }
 }
 
-void Server::sendToClient(ServerActionType actionType, QVector<QString> output) {
+// Request to a data base based on action type
+void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>& info) {
+    QVector<QString> answerToClient;
+
+    switch (actionType) {
+    case ServerActionType::AddNewUser: {
+        // Mock work
+        if (info[0] == mockInfo_.name) {
+            answerToClient.push_back("0");
+        }
+        else {
+            mockInfo_.name = info[0];
+            mockInfo_.pass = info[1];
+            answerToClient.push_back("1");
+        }
+        sendToClient(ServerActionType::AddNewUser, answerToClient);
+        //addUser(info);
+        break;
+    }
+    case ServerActionType::CheckUserStatement: {
+        // mock work
+        if (info[0] == mockInfo_.name && info[1] == mockInfo_.pass) {
+            answerToClient.push_back("1");
+        }
+        sendToClient(ServerActionType::CheckUserStatement, answerToClient);
+        //checkUserStatement(info);
+        break;
+    }
+    }
+}
+
+void Server::sendToClient(ServerActionType actionType, const QVector<QString>& output) {
     data_.clear();
 
     QDataStream out(&data_, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_8);
+    out.setVersion(QDataStream::Qt_6_10);
 
     // Calculate and write a size of the sent data package
     out << quint16(0) << actionType << output;
@@ -122,7 +148,7 @@ void Server::sendToClient(ServerActionType actionType, QVector<QString> output) 
 }
 
 // Checks is user exists, if not, adds it in database
-void Server::addUser(QVector<QString> userInfo) {
+void Server::addUser(const QVector<QString>& info) {
     QVector<QString> answerToClient;
 
     // Check is user with the same login exists
@@ -133,7 +159,7 @@ void Server::addUser(QVector<QString> userInfo) {
     while (query.next()) {
         QString dbLogin = query.value("login").toString();
 
-        if (userInfo[0] == dbLogin) {
+        if (info[0] == dbLogin) {
             isUserExists = true;
         }
     }
@@ -145,7 +171,7 @@ void Server::addUser(QVector<QString> userInfo) {
         answerToClient.push_back("1");
 
         QString insertInDB = "INSERT INTO public.\"Users\" (login, password, email) VALUES ('" +
-                             userInfo[0] + "', '" + userInfo[1] + "', '" + userInfo[2] + "');";
+                             info[0] + "', '" + info[1] + "', '" + info[2] + "');";
 
         query.exec(insertInDB);
     }
@@ -155,7 +181,7 @@ void Server::addUser(QVector<QString> userInfo) {
 
 
 // Checks is user exists and entered password was right
-void Server::checkUserStatement(QVector<QString> userInfo) {
+void Server::checkUserStatement(const QVector<QString>& info) {
     QVector<QString> answerToClient;
 
     // Check is user with the same login and pasword exists
@@ -167,7 +193,7 @@ void Server::checkUserStatement(QVector<QString> userInfo) {
         QString dbLogin = query.value("login").toString();
         QString dbPassword = query.value("password").toString();
 
-        if (userInfo[0] == dbLogin && userInfo[1] == dbPassword) {
+        if (info[0] == dbLogin && info[1] == dbPassword) {
             isUserExists = true;
         }
     }
@@ -180,63 +206,5 @@ void Server::checkUserStatement(QVector<QString> userInfo) {
     }
 
     sendToClient(ServerActionType::CheckUserStatement, answerToClient);
-}
-
-void Server::getWatersNames() {
-    QVector<QString> answerToClient;
-
-    QSqlQuery query;
-    query.exec("SELECT * FROM waters");
-
-    while (query.next()) {
-        QString waterName = query.value("water_name").toString();
-        answerToClient.push_back(waterName);
-    }
-
-    //sendToClient(3, answerToClient);
-}
-
-void Server::getWaterInfo(QVector<QString> waterName) {
-    QVector<QString> answerToClient;
-    int category = 0;
-
-    QSqlQuery query;
-    query.exec("SELECT * FROM waters");
-
-    // Get info about category of water
-    while (query.next()) {
-        QString dbWaterName = query.value("water_name").toString();
-
-        if (waterName[0] == dbWaterName) {
-            category = query.value("category").toInt();
-            break;
-        }
-    }
-
-    // Get info about water's limits
-    query.exec("SELECT * FROM categories");
-
-    while (query.next()) {
-        int categoryId = query.value("category_id").toInt();
-
-        if (categoryId == category) {
-            QString waterLevelLimit = query.value("water_level_limit").toString();
-            answerToClient.push_back(waterLevelLimit);
-            break;
-        }
-    }
-
-    // Get info about water level and date of measurements
-    query.exec("SELECT * FROM public.\"" + waterName[0] + "\"");
-
-    while (query.next()) {
-        QString date = query.value("date").toString();
-        QString waterLevel = query.value("water_level").toString();
-
-        answerToClient.push_back(date);
-        answerToClient.push_back(waterLevel);
-    }
-
-    //sendToClient(4, answerToClient);
 }
 }

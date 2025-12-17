@@ -33,7 +33,7 @@ void AccountCreationDlg::on_create_account_button_clicked() {
     QVector<QString> userInfo;
     userInfo.push_back(ui_->user_login->text());
     userInfo.push_back(ui_->user_password->text());
-    userInfo.push_back(ui_->user_email->text());
+    userInfo.push_back(ui_->vessel_name->text());
 
     connect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
     Component::SOCKET.addUser(userInfo);

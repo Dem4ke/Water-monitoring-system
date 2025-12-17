@@ -21,19 +21,24 @@ SocketComponent &SocketComponent::Instance() {
 }
 
 // Send to server info about user and request an answer
-void SocketComponent::checkUserStatement(QVector<QString> info) {
+void SocketComponent::checkUserStatement(const QVector<QString>& info) {
     sendToServer(ServerActionType::CheckUserStatement, info);
 }
 
 // Send to server info about user and request to add it into database
-void SocketComponent::addUser(QVector<QString> info) {
+void SocketComponent::addUser(const QVector<QString>& info) {
     sendToServer(ServerActionType::AddNewUser, info);
+}
+
+// Send request to find nearest vessels in inputted radius to the server
+void SocketComponent::getNearVesselLocation(float radius) {
+
 }
 
 // Handler of a server's messages
 void SocketComponent::slotReadyRead() {
     QDataStream input(socket_);
-    input.setVersion(QDataStream::Qt_6_8);
+    input.setVersion(QDataStream::Qt_6_10);
 
     if (input.status() == QDataStream::Ok) {
         while(true) {
@@ -58,21 +63,7 @@ void SocketComponent::slotReadyRead() {
 
             input >> actionType>> info;
 
-            if (actionType == ServerActionType::AddNewUser ||
-                actionType == ServerActionType::CheckUserStatement) {
-
-                if (info.isEmpty()) {
-                    break;
-                }
-
-                bool isLogAvalible = false;
-
-                if (info[0] == "1") {
-                    isLogAvalible = true;
-                }
-
-                emit getUserStatus(isLogAvalible);
-            }
+            serverRequest(actionType, info);
 
             blockSize_ = 0;
             break;
@@ -80,14 +71,34 @@ void SocketComponent::slotReadyRead() {
     }
 }
 
-void SocketComponent::sendToServer(ServerActionType actionType, QVector<QString> output) {
+// Server message handler
+void SocketComponent::serverRequest(ServerActionType actionType, const QVector<QString>& info) {
+    if (actionType == ServerActionType::AddNewUser ||
+        actionType == ServerActionType::CheckUserStatement) {
+
+        if (info.isEmpty()) {
+            return;
+        }
+
+        bool isLogAvalible = false;
+
+        if (info[0] == "1") {
+            isLogAvalible = true;
+        }
+
+        emit getUserStatus(isLogAvalible);
+    }
+}
+
+// Send information to server
+void SocketComponent::sendToServer(ServerActionType actionType, const QVector<QString>& info) {
     data_.clear();
 
     QDataStream out(&data_, QIODevice::WriteOnly);
-    out.setVersion(QDataStream::Qt_6_8);
+    out.setVersion(QDataStream::Qt_6_10);
 
     // Calculate and write a size of the sent data package
-    out << quint16(0) << actionType << output;
+    out << quint16(0) << actionType << info;
     out.device()->seek(0);
     out << quint16(data_.size() - sizeof(quint16));
 
