@@ -8,8 +8,8 @@ namespace Component {
 enum class ServerActionType : int {
     AddNewUser = 0,             // Insert user in database
     CheckUserStatement,         // Check user statement (are login and password correct)
-    GetVesselInfo,
-    SetVesselInfo,
+    SetVesselInfo,              // Send geo and meteo data to the server
+    GetNearLocations,           // Send request to get nearest vessels locations
 };
 
 class SocketComponent : public QObject {
@@ -20,11 +20,12 @@ public:
 
     void checkUserStatement(const QVector<QString>& info);
     void addUser(const QVector<QString>& info);
-    void getNearVesselLocationRequest(const QPointF& location, float radius);
+    void updateVesselData(const QPointF& location, double windForce, double waveHeight);
+    void getNearVesselLocations(const QPointF& location, float radius);
 
 signals:
     void getUserStatus(bool isLogAvalible);
-    void updateLocationsRequest(const QVector<QString>& locations);
+    void updateNearVesselLocationsRequest(const QVector<QPointF>& locations);
 
 private slots:
     // Server tools

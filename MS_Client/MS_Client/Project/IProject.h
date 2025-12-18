@@ -1,6 +1,7 @@
 #pragma once
 
-class QPointF;
+#include <QVector>
+#include <QPointF>
 
 namespace MS {
 class IProject {
@@ -10,10 +11,7 @@ public:
     virtual void setCurrentLocation(const QPointF& location) = 0;
     virtual const QPointF& getCurrentLocation() = 0;
 
-    virtual void addWindForcePoint(double value) = 0;
-    virtual double getAverageWindForce() const = 0;
-
-    virtual void addWaveHeightPoint(double value) = 0;
-    virtual double getAverageWaveHeight() const = 0;
+    virtual void setNearVesselLocations(const QVector<QPointF>& locations) = 0;
+    virtual const QVector<QPointF>& getNearVesselLocations() = 0;
 };
 }

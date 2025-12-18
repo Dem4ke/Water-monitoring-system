@@ -15,4 +15,10 @@ const QVector<double>& NMEA2000VesselAPI::getWindForces() {
 const QVector<double>& NMEA2000VesselAPI::getWaveHeights() {
     return waveHeights_;
 }
+
+// Clear all cache after that information had sent
+void NMEA2000VesselAPI::clearCache() {
+    windForces_.clear();
+    waveHeights_.clear();
+}
 }

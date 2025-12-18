@@ -12,5 +12,7 @@ public:
     virtual const QPointF& getGPSLocation() = 0;
     virtual const QVector<double>& getWindForces() = 0;
     virtual const QVector<double>& getWaveHeights() = 0;
+
+    virtual void clearCache() = 0;
 };
 }

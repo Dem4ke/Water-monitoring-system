@@ -1,6 +1,7 @@
 #include "SocketComponent.h"
 
 #include <QMessageBox>
+#include <QPointF>
 
 namespace Component {
 SocketComponent::SocketComponent(QObject* parent)
@@ -30,9 +31,25 @@ void SocketComponent::addUser(const QVector<QString>& info) {
     sendToServer(ServerActionType::AddNewUser, info);
 }
 
-// Send request to find nearest vessels in inputted radius to the server
-void SocketComponent::getNearVesselLocation(float radius) {
+// Send monitoring's data to server
+void SocketComponent::updateVesselData(const QPointF& location, double windForce, double waveHeight) {
+    QVector<QString> info;
+    info.push_back(QString::number(location.x()));
+    info.push_back(QString::number(location.y()));
+    info.push_back(QString::number(windForce));
+    info.push_back(QString::number(waveHeight));
 
+    sendToServer(ServerActionType::SetVesselInfo, info);
+}
+
+// Send request to find nearest vessels in inputted radius to the server
+void SocketComponent::getNearVesselLocations(const QPointF& location, float radius) {
+    QVector<QString> info;
+    info.push_back(QString::number(location.x()));
+    info.push_back(QString::number(location.y()));
+    info.push_back(QString::number(radius));
+
+    sendToServer(ServerActionType::GetNearLocations, info);
 }
 
 // Handler of a server's messages
@@ -87,6 +104,23 @@ void SocketComponent::serverRequest(ServerActionType actionType, const QVector<Q
         }
 
         emit getUserStatus(isLogAvalible);
+    }
+    else if (actionType == ServerActionType::GetNearLocations) {
+        if (info.isEmpty()) {
+            return;
+        }
+
+        QVector<QPointF> locations;
+
+        for (int i = 0, end = info.size(); i < end; i += 2) {
+            if ((i + 1) > end) {
+                break;
+            }
+
+            locations.emplace_back(QPointF(info[i].toDouble(), info[i + 1].toDouble()));
+        }
+
+        emit updateNearVesselLocationsRequest(locations);
     }
 }
 

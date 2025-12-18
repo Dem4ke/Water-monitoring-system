@@ -1,8 +1,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-#include "Components/ConfigComponent.h"
-#include "Components/SocketComponent.h"
 #include "Components/ProjectComponent.h"
 
 #include <QDir>
@@ -21,25 +19,16 @@ MainWindow::MainWindow(QWidget* parent)
 
     // Create project component and start to collect information
     projectComponent_ = new Component::ProjectComponent(this);
-
-    // Connect to socket component
-    connect(&Component::SOCKET.Instance(), &Component::SocketComponent::updateLocationsRequest, this, &MainWindow::updateLocations);
-
-    // Find first
-    getNearVesselLocation(Component::CONFIG.getSearchRadius());
+    connect(projectComponent_, &Component::ProjectComponent::mapUpdateRequest,
+            this, &MainWindow::mapUpdate);
 }
 
 MainWindow::~MainWindow() {
     delete ui_;
 }
 
-// Update near vessels locations on the map
-void MainWindow::updateLocations(const QVector<QString>& locations) {
+// Update vessels locations on map
+void MainWindow::mapUpdate(const QPointF& vesselLocation, const QVector<QPointF>& locations) {
 
-}
-
-// Get near vessels' locations from server and set them on map widgetvoid
-MainWindow::getNearVesselLocation(const QPointF& location, float radius) {
-    Component::SOCKET.getNearVesselLocationRequest(radius);
 }
 }

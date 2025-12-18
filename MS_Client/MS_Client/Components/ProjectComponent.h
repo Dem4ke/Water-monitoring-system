@@ -18,14 +18,16 @@ class ProjectComponent : public QObject {
     Q_OBJECT
 
 public:
-    explicit ProjectComponent(QObject* parent = nullptr);
+    ProjectComponent(QObject* parent = nullptr);
+    ~ProjectComponent() = default;
 
 signals:
-
-    // Здесь будет сбор информации от судового АПИ, таймер и сигнал для отправки информации на сервер
+    void mapUpdateRequest(const QPointF& vesselLocation, const QVector<QPointF>& locations);
 
 private slots:
     void dataUpdate();
+    void locationsUpdate();
+    void updateNearVesselLocations(const QVector<QPointF>& locations);
 
 private:
     std::shared_ptr<MS::IProject> project_ = nullptr;               // Project (vessel) that contains information

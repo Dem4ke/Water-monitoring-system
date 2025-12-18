@@ -18,12 +18,10 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow();
 
-public slots:
-    void updateLocations(const QVector<QString>& locations);
+private slots:
+    void mapUpdate(const QPointF& vesselLocation, const QVector<QPointF>& locations);
 
 private:
-    void getNearVesselLocation(const QPointF& location, float radius);
-
     Ui::MainWindow* ui_;                                        // Graphical user interface
     Component::ProjectComponent* projectComponent_ = nullptr;   // Project component
 };

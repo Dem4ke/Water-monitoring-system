@@ -13,6 +13,8 @@ public:
     const QVector<double>& getWindForces() override;
     const QVector<double>& getWaveHeights() override;
 
+    void clearCache() override;
+
 private:
     QPointF location_;                  // Current GPS location of the vessel
     QVector<double> windForces_;        // Measures of wind force
