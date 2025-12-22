@@ -1,6 +1,9 @@
 #pragma once
 
 #include <QObject>
+#include <QVector>
+#include <QGeoCoordinate>
+#include <QDateTime>
 
 class QTimer;
 
@@ -18,16 +21,18 @@ class ProjectComponent : public QObject {
     Q_OBJECT
 
 public:
-    ProjectComponent(QObject* parent = nullptr);
+    ProjectComponent(QObject* parent, int vesselId);
     ~ProjectComponent() = default;
 
 signals:
-    void mapUpdateRequest(const QPointF& vesselLocation, const QVector<QPointF>& locations);
+    void locationsUpdateRequest(const QMap<int, QGeoCoordinate>& locations);
+    void currentLocationUpdateRequest(const QGeoCoordinate& currentlLocation);
 
-private slots:
+public slots:
     void dataUpdate();
     void locationsUpdate();
-    void updateNearVesselLocations(const QVector<QPointF>& locations);
+    void updateNearVesselLocations(const QMap<int, QGeoCoordinate>& locations);
+    void vesselDataRequested(int index);
 
 private:
     std::shared_ptr<MS::IProject> project_ = nullptr;               // Project (vessel) that contains information

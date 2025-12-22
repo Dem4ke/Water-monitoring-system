@@ -16,11 +16,12 @@ AccountCreationDlg::~AccountCreationDlg() {
     delete ui_;
 }
 
-void AccountCreationDlg::checkUserStatus(bool isLogAvalible) {
-    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
+void AccountCreationDlg::updateUserStatus(bool isLogAvalible, int vesselId) {
+    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::updateUserStatusRequest,
+               this, &AccountCreationDlg::updateUserStatus);
 
     if (isLogAvalible) {
-        emit accountCreated(true);
+        emit accountCreated(true, vesselId);
 
         this->close();
     }
@@ -35,7 +36,9 @@ void AccountCreationDlg::on_create_account_button_clicked() {
     userInfo.push_back(ui_->user_password->text());
     userInfo.push_back(ui_->vessel_name->text());
 
-    connect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &AccountCreationDlg::checkUserStatus);
+    connect(&Component::SOCKET.Instance(), &Component::SocketComponent::updateUserStatusRequest,
+            this, &AccountCreationDlg::updateUserStatus);
+
     Component::SOCKET.addUser(userInfo);
 }
 }

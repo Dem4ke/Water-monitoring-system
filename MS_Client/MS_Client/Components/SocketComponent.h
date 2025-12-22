@@ -3,6 +3,8 @@
 #include <QObject>
 #include <QTcpSocket>
 
+class QGeoCoordinate;
+
 namespace Component {
 // Variables of the server's actions
 enum class ServerActionType : int {
@@ -10,6 +12,7 @@ enum class ServerActionType : int {
     CheckUserStatement,         // Check user statement (are login and password correct)
     SetVesselInfo,              // Send geo and meteo data to the server
     GetNearLocations,           // Send request to get nearest vessels locations
+    GetVesselData,              // Send request to get data of vessel by data base index
 };
 
 class SocketComponent : public QObject {
@@ -20,12 +23,16 @@ public:
 
     void checkUserStatement(const QVector<QString>& info);
     void addUser(const QVector<QString>& info);
-    void updateVesselData(const QPointF& location, double windForce, double waveHeight);
-    void getNearVesselLocations(const QPointF& location, float radius);
+    void updateVesselData(int id, const QGeoCoordinate& location, double windForce, double waveHeight);
+    void getNearVesselLocations(const QGeoCoordinate& location, float radius);
+    void getVesselData(int vesselIndex, int searchTimeSec);
 
 signals:
-    void getUserStatus(bool isLogAvalible);
-    void updateNearVesselLocationsRequest(const QVector<QPointF>& locations);
+    void updateUserStatusRequest(bool isLogAvalible, int vesselId);
+    void updateNearVesselLocationsRequest(const QMap<int, QGeoCoordinate>& locations);
+    void updateRoadMapRequest(const QVector<QGeoCoordinate>& roadLocations);
+    void updateWindForcePlotRequest(const QVector<QDateTime>& timePoints, const QVector<double>& windForces);
+    void updateWaveHeightPlotRequest(const QVector<QDateTime>& timePoints, const QVector<double>& waveHeights);
 
 private slots:
     // Server tools

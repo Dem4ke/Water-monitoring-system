@@ -21,8 +21,9 @@ namespace MS {
 enum class ServerActionType : int {
     AddNewUser = 0,             // Insert user in database
     CheckUserStatement,         // Check user statement (are login and password correct)
-    GetVesselInfo,
-    SetVesselInfo,
+    SetVesselInfo,              // Set geo and meteo data to the data base
+    GetNearLocations,           // Send request to get nearest vessels locations
+    GetVesselData,              // Get data of vessel by data base index
 };
 
 // Data base tables imitation
@@ -41,6 +42,7 @@ struct VesselTable {
 };
 
 struct MockInfo {
+    int id = 1;
     QString name = "1";
     QString pass = "1";
 
@@ -65,10 +67,12 @@ private:
     void dataBaseRequest(ServerActionType actionType, const QVector<QString>& info);
     void sendToClient(ServerActionType actionType, const QVector<QString>& info);
 
-    // Database users tools
+    // Database tools
     void addUser(const QVector<QString>& info);
     void checkUserStatement(const QVector<QString>& info);
-
+    void setVesselInfo(const QVector<QString>& info);
+    void getNearLocations(const QVector<QString>& info);
+    void getVesselData(const QVector<QString>& info);
 
 private:
     quint16 blockSize_ = 0;             // Size of data package

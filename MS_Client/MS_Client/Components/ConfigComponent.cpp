@@ -53,14 +53,39 @@ void ConfigComponent::serialize() {
     writeInData.close();
 }
 
+
 // Set index of current language used by the application
-void ConfigComponent::setCurrentLanguage(int languageIndex) {
-    languageIndex_ = languageIndex;
+void ConfigComponent::setCurrentLanguage(int index) {
+    languageIndex_ = index;
 }
 
 // Get index of current language used by the application
 int ConfigComponent::getCurrentLanguage() const {
     return languageIndex_;
+}
+
+void ConfigComponent::setVesselMonSysIndex(int index) {
+    vesselMonSysIndex_ = index;
+}
+
+int ConfigComponent::getVesselMonSysIndex() const {
+    return vesselMonSysIndex_;
+}
+
+void ConfigComponent::setSearchTime(int seconds) {
+    searchTimeSec_ = seconds;
+}
+
+int ConfigComponent::getSearchTime() const {
+    return searchTimeSec_;
+}
+
+void ConfigComponent::setSearchRadius(float radius) {
+    searchRadius_ = radius;
+}
+
+int ConfigComponent::getSearchRadius() const {
+    return searchRadius_;
 }
 
 // Initialize default values

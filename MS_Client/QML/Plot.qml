@@ -1,21 +1,42 @@
-import QtQuick
-import QtCharts
+import QtQuick 2.15
+import QtCharts 2.15
 
 ChartView {
-    width: 400
-    height: 300
-    title: "Simple Line Plot"
+    anchors.fill: parent
     antialiasing: true
 
-    ValueAxis { id: axisX; min: 0; max: 3 }
-    ValueAxis { id: axisY; min: 0; max: 3 }
+    DateTimeAxis {
+        id: axisX
+        min: new Date(plotData.minTime)
+        max: new Date(plotData.maxTime)
+        format: "hh:mm:ss"
+        titleText: "Time"
+    }
+
+    ValueAxis {
+        id: axisY
+        min: plotData.minValue
+        max: plotData.maxValue
+        titleText: "Value"
+    }
 
     LineSeries {
+        id: series
+        name: plotData.name
         axisX: axisX
         axisY: axisY
-        XYPoint { x: 0; y: 0 }
-        XYPoint { x: 1; y: 2 }
-        XYPoint { x: 2; y: 1 }
-        XYPoint { x: 3; y: 3 }
+    }
+
+    Connections {
+        target: plotData
+
+        function onRedrawPlotRequest() {
+            series.clear()
+
+            const pts = plotData.points
+            for (let i = 0; i < pts.length; ++i) {
+                series.append(pts[i].x, pts[i].y)
+            }
+        }
     }
 }

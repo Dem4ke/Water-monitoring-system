@@ -17,7 +17,7 @@ public:
     ~UserLoginDlg();
 
 public slots:
-    void checkUserStatus(bool isLogAvalible);
+    void updateUserStatus(bool isLogAvalible, int vesselId);
 
 private slots:
     void on_sign_in_button_clicked();

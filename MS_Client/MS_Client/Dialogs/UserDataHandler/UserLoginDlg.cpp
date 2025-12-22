@@ -18,13 +18,14 @@ UserLoginDlg::~UserLoginDlg() {
     delete ui_;
 }
 
-void UserLoginDlg::checkUserStatus(bool isLogAvalible) {
-    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &UserLoginDlg::checkUserStatus);
+void UserLoginDlg::updateUserStatus(bool isLogAvalible, int vesselId) {
+    disconnect(&Component::SOCKET.Instance(), &Component::SocketComponent::updateUserStatusRequest,
+               this, &UserLoginDlg::updateUserStatus);
 
     if (isLogAvalible) {
         this->hide();
 
-        MS::MainWindow* mainWindow = new MS::MainWindow;
+        MS::MainWindow* mainWindow = new MS::MainWindow(nullptr, vesselId);
         mainWindow->show();
     }
     else {
@@ -37,13 +38,15 @@ void UserLoginDlg::on_sign_in_button_clicked() {
     userInfo.push_back(ui_->user_login->text());
     userInfo.push_back(ui_->user_password->text());
 
-    connect(&Component::SOCKET.Instance(), &Component::SocketComponent::getUserStatus, this, &UserLoginDlg::checkUserStatus);
+    connect(&Component::SOCKET.Instance(), &Component::SocketComponent::updateUserStatusRequest,
+            this, &UserLoginDlg::updateUserStatus);
+
     Component::SOCKET.checkUserStatement(userInfo);
 }
 
 void UserLoginDlg::on_create_account_button_clicked() {
     AccountCreationDlg* accountCreationDlg = new AccountCreationDlg(this);
-    connect(accountCreationDlg, &AccountCreationDlg::accountCreated, this, &UserLoginDlg::checkUserStatus);
+    connect(accountCreationDlg, &AccountCreationDlg::accountCreated, this, &UserLoginDlg::updateUserStatus);
 
     accountCreationDlg->exec();
     delete accountCreationDlg;

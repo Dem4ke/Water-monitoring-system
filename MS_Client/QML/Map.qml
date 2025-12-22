@@ -9,20 +9,13 @@ Item {
     width: 1024
     height: 768
 
-    property var coordinatesArray: [
-        { latitude: -2.0, longitude: -9.4 },
-        { latitude: -19.0, longitude: 5.0 },
-        { latitude: -31.0, longitude: 14.0 }
-    ]
-
     Plugin {
         id: mapPlugin
         name: "osm"  // OSM plugin supports custom tile servers
 
         // Example for a custom tile server, might not require an API key
-                // Note: You need to find a suitable tile server and its URL format
-                PluginParameter { name: "osm.mapping.custom.host"; value: "http://tile.openstreetmap.org/%z/%x/%y.png" }
-
+        // Note: You need to find a suitable tile server and its URL format
+        PluginParameter { name: "osm.mapping.custom.host"; value: "http://tile.openstreetmap.org/%z/%x/%y.png" }
     }
 
     Map {
@@ -30,57 +23,67 @@ Item {
         anchors.fill: parent
         plugin: mapPlugin
         activeMapType: supportedMapTypes[supportedMapTypes.length - 1]
-        center: QtPositioning.coordinate(37.7749, -122.4194)
-        property var gpsCoord: QtPositioning.coordinate(-5, -5)
+        //center: QtPositioning.coordinate(0, 0)
         zoomLevel: 2
 
         // GPS marker
         MapQuickItem {
-            property int markerSize: 20
+            id: currentLocationMarker
+            coordinate: mapData.currentLocation
+            visible: mapData.currentLocation.isValid
 
-            id: gpsMarker
-            coordinate: map.gpsCoord
-            anchorPoint.x: markerSize/2
-            anchorPoint.y: markerSize/2
-            visible: posSource.active
+            anchorPoint.x: sourceItem.width / 2
+            anchorPoint.y: sourceItem.height / 2
+
             sourceItem: Rectangle {
-                width: markerSize
-                height: markerSize
-                radius: markerSize/2
-                border.color: "red"
+                width: 16
+                height: 16
+                radius: 8
+                color: "blue"
+                border.color: "white"
                 border.width: 2
-                color: "red"
-                Text {
-                    anchors.centerIn: parent
-                    text: "⦿"
-                    font.pixelSize: markerSize
-                    color: "red"
-                }
             }
         }
 
-        // Add red dot markers for each coordinate
-        Repeater {
-            model: coordinatesArray
+        // Near vesels' locations
+        MapItemView {
+            model: mapData.locations
 
-            MapQuickItem {
-                id: marker
-                coordinate: QtPositioning.coordinate(modelData.latitude, modelData.longitude)
-                anchorPoint.x: 6
-                anchorPoint.y: 6
+            delegate: MapQuickItem {
+                id: locationMarker
+                coordinate: modelData
+
+                anchorPoint.x: sourceItem.width / 2
+                anchorPoint.y: sourceItem.height / 2
+
                 sourceItem: Rectangle {
                     width: 12
                     height: 12
-                    color: "red"
                     radius: 6
+                    color: "red"
                     border.color: "black"
                     border.width: 1
 
                     MouseArea {
                         anchors.fill: parent
-                        onClicked: popupMenu.open()
+                        onClicked: mapData.vesselDataRequested(index)
                     }
                 }
+            }
+        }
+
+        // Chosen vessel's road
+        MapPolyline {
+            id: roadLine
+            line.width: 4
+            line.color: "blue"
+            path: mapData.roadMap
+        }
+
+        Component.onCompleted: {
+            // Center map on current vessel coordinations
+            if (mapData.currentLocation.isValid) {
+                map.center = mapData.currentLocation
             }
         }
 
@@ -104,14 +107,5 @@ Item {
             acceptedButtons: Qt.RightButton
             onTranslationChanged: (delta) => map.pan(-delta.x, -delta.y)
         }
-    }
-
-    // Empty popup menu that appears when a marker is clicked
-    Menu {
-        id: popupMenu
-        title: "Marker Menu"
-        MenuItem { text: "Option 1" }
-        MenuItem { text: "Option 2" }
-        MenuItem { text: "Option 3" }
     }
 }

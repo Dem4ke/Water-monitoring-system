@@ -1,8 +1,14 @@
 #include "NMEA2000VesselAPI.h"
 
 namespace VesselAPI {
+
+NMEA2000VesselAPI::NMEA2000VesselAPI() {
+    location_.setLatitude(0.0);
+    location_.setLongitude(0.0);
+}
+
 // Getter for gps location
-const QPointF& NMEA2000VesselAPI::getGPSLocation() {
+const QGeoCoordinate& NMEA2000VesselAPI::getGPSLocation() {
     return location_;
 }
 

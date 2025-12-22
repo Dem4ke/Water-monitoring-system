@@ -1,7 +1,8 @@
 #include "SocketComponent.h"
 
+#include <QGeoCoordinate>
 #include <QMessageBox>
-#include <QPointF>
+#include <QDateTime>
 
 namespace Component {
 SocketComponent::SocketComponent(QObject* parent)
@@ -32,10 +33,13 @@ void SocketComponent::addUser(const QVector<QString>& info) {
 }
 
 // Send monitoring's data to server
-void SocketComponent::updateVesselData(const QPointF& location, double windForce, double waveHeight) {
+void SocketComponent::updateVesselData(int id, const QGeoCoordinate& location,
+                                       double windForce, double waveHeight) {
     QVector<QString> info;
-    info.push_back(QString::number(location.x()));
-    info.push_back(QString::number(location.y()));
+    info.push_back(QString::number(id));
+    info.push_back(QDateTime::currentDateTimeUtc().toString("yyyy-MM-dd hh:mm:ss+00"));
+    info.push_back(QString::number(location.latitude()));
+    info.push_back(QString::number(location.longitude()));
     info.push_back(QString::number(windForce));
     info.push_back(QString::number(waveHeight));
 
@@ -43,13 +47,21 @@ void SocketComponent::updateVesselData(const QPointF& location, double windForce
 }
 
 // Send request to find nearest vessels in inputted radius to the server
-void SocketComponent::getNearVesselLocations(const QPointF& location, float radius) {
+void SocketComponent::getNearVesselLocations(const QGeoCoordinate& location, float radius) {
     QVector<QString> info;
-    info.push_back(QString::number(location.x()));
-    info.push_back(QString::number(location.y()));
+    info.push_back(QString::number(location.latitude()));
+    info.push_back(QString::number(location.longitude()));
     info.push_back(QString::number(radius));
 
     sendToServer(ServerActionType::GetNearLocations, info);
+}
+
+void SocketComponent::getVesselData(int vesselIndex, int searchTimeSec) {
+    QVector<QString> info;
+    info.push_back(QString::number(vesselIndex));
+    info.push_back(QString::number(searchTimeSec));
+
+    sendToServer(ServerActionType::GetVesselData, info);
 }
 
 // Handler of a server's messages
@@ -98,29 +110,94 @@ void SocketComponent::serverRequest(ServerActionType actionType, const QVector<Q
         }
 
         bool isLogAvalible = false;
+        int vesselId = -1;
 
+        // If user is validated, he gets his database unique id
         if (info[0] == "1") {
             isLogAvalible = true;
+            vesselId = info[1].toInt();
         }
 
-        emit getUserStatus(isLogAvalible);
+        emit updateUserStatusRequest(isLogAvalible, vesselId);
     }
     else if (actionType == ServerActionType::GetNearLocations) {
+        if (info.isEmpty() || info.size() % 3 != 0) {
+            return;
+        }
+
+        // Map with key - id of the vessel, value - it's coordinates
+        QMap<int, QGeoCoordinate> locations;
+
+        for (int i = 0, end = info.size(); i < end; i += 3) {
+            QGeoCoordinate geo(info[i + 1].toDouble(), info[i + 2].toDouble());
+            locations.insert(info[i].toInt(), geo);
+        }
+
+        emit updateNearVesselLocationsRequest(locations);
+    }
+    else if (actionType == ServerActionType::GetVesselData) {
         if (info.isEmpty()) {
             return;
         }
 
-        QVector<QPointF> locations;
+        // Map with key - id of the vessel, value - it's coordinates
+        QVector<double> tempLocations;
+        QVector<QGeoCoordinate> roadLocations;
+        QVector<QDateTime> timePoints;
+        QVector<double> windForces;
+        QVector<double> waveHeights;
 
-        for (int i = 0, end = info.size(); i < end; i += 2) {
-            if ((i + 1) > end) {
-                break;
+        int switcher = -1;
+
+        for (auto& i : info) {
+            if (i == "road") {
+                switcher = 0;
+                continue;
+            }
+            else if (i == "date") {
+                switcher = 1;
+                continue;
+            }
+            else if (i == "wind") {
+                switcher = 2;
+                continue;
+            }
+            else if (i == "wave") {
+                switcher = 3;
+                continue;
             }
 
-            locations.emplace_back(QPointF(info[i].toDouble(), info[i + 1].toDouble()));
+            switch(switcher) {
+            case 0: {
+                tempLocations.push_back(i.toDouble());
+                break;
+            }
+            case 1: {
+                timePoints.emplaceBack(QDateTime(QDateTime::fromString(i, "yyyy-MM-dd hh:mm:ss+00")));
+                break;
+            }
+            case 2: {
+                windForces.push_back(i.toDouble());
+                break;
+            }
+            case 3: {
+                waveHeights.push_back(i.toDouble());
+                break;
+            }
+            }
         }
 
-        emit updateNearVesselLocationsRequest(locations);
+        if (tempLocations.size() % 2 != 0) {
+            return;
+        }
+
+        for (int i = 0, end = tempLocations.size(); i < end; i += 2) {
+            roadLocations.emplaceBack(QGeoCoordinate(tempLocations[i], tempLocations[i + 1]));
+        }
+
+        emit updateRoadMapRequest(roadLocations);
+        emit updateWindForcePlotRequest(timePoints, windForces);
+        emit updateWaveHeightPlotRequest(timePoints, waveHeights);
     }
 }
 

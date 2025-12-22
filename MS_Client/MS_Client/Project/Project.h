@@ -6,17 +6,20 @@ namespace MS {
 // Class that provides vessel and handles all its measurements
 class Project : public IProject {
 public:
-    Project() = default;
+    Project(int id);
     ~Project() = default;
 
-    void setCurrentLocation(const QPointF& location) override;
-    const QPointF& getCurrentLocation() override;
+    int getId() const override;
 
-    void setNearVesselLocations(const QVector<QPointF>& locations) override;
-    const QVector<QPointF>& getNearVesselLocations() override;
+    void setCurrentLocation(const QGeoCoordinate& location) override;
+    const QGeoCoordinate& getCurrentLocation() override;
+
+    void setNearVesselLocations(const QMap<int, QGeoCoordinate>& locations) override;
+    const QMap<int, QGeoCoordinate>& getNearVesselLocations() override;
 
 private:
-    QPointF currentLocation_;           // Last received location of vessel
-    QVector<QPointF> locations_;        // All locations of near vessels
+    int id_ = -1;                               // Unique data base id for the vessel
+    QGeoCoordinate currentLocation_;            // Last received location of vessel
+    QMap<int, QGeoCoordinate> locations_;       // All locations of near vessels and it's id
 };
 }

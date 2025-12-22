@@ -9,7 +9,7 @@
 #include <QDebug>
 
 namespace Component {
-ProjectComponent::ProjectComponent(QObject* parent)
+ProjectComponent::ProjectComponent(QObject* parent, int vesselId)
     : QObject{parent} {
 
     // Create concrete vessel's monitoring API
@@ -32,11 +32,16 @@ ProjectComponent::ProjectComponent(QObject* parent)
     }
 
     // Create project and update data
-    project_ = std::make_shared<MS::Project>();
+    project_ = std::make_shared<MS::Project>(vesselId);
     project_->setCurrentLocation(vesselAPI_->getGPSLocation());
+
+    // Only for test
+    QGeoCoordinate geo(0, 0);
+    project_->setCurrentLocation(geo);
 
     connect(&Component::SOCKET.Instance(), &Component::SocketComponent::updateNearVesselLocationsRequest,
             this, &ProjectComponent::updateNearVesselLocations);
+
 
     // Create timer to update information from vessel's monitoring system API and send information to server
     timer_ = new QTimer(this);
@@ -46,6 +51,9 @@ ProjectComponent::ProjectComponent(QObject* parent)
 
     // Start the timer
     timer_->start(60000);
+
+    dataUpdate();
+    locationsUpdate();
 }
 
 // Collect geo and meteo data from vessel's monitoring system API and create request to update data on the server side
@@ -62,14 +70,16 @@ void ProjectComponent::dataUpdate() {
         return average;
     };
 
-    QPointF location = vesselAPI_->getGPSLocation();
+    QGeoCoordinate location = vesselAPI_->getGPSLocation();
     double windForce = getAverage(vesselAPI_->getWindForces());
     double waveHeight = getAverage(vesselAPI_->getWaveHeights());
 
     vesselAPI_->clearCache();
     project_->setCurrentLocation(location);
 
-    SOCKET.updateVesselData(location, windForce, waveHeight);
+    SOCKET.updateVesselData(project_->getId(), location, windForce, waveHeight);
+
+    emit currentLocationUpdateRequest(project_->getCurrentLocation());
 }
 
 // Send request to find all near vessels based on current vessel's location and search radius
@@ -78,10 +88,15 @@ void ProjectComponent::locationsUpdate() {
 }
 
 // Receive locations of near vessels from server and update project's data
-void ProjectComponent::updateNearVesselLocations(const QVector<QPointF>& locations) {
+void ProjectComponent::updateNearVesselLocations(const QMap<int, QGeoCoordinate>& locations) {
     project_->setNearVesselLocations(locations);
 
     // Update map in GUI layout
-    emit mapUpdateRequest(project_->getCurrentLocation(), project_->getNearVesselLocations());
+    emit locationsUpdateRequest(locations);
+}
+
+// Send request to the server to get chosen vessel's data
+void ProjectComponent::vesselDataRequested(int index) {
+    SOCKET.getVesselData(index, CONFIG.getSearchTime());
 }
 }

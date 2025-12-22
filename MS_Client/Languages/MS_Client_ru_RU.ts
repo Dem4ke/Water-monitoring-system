@@ -20,7 +20,7 @@
     </message>
     <message>
         <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.ui" line="44"/>
-        <source>E-mail</source>
+        <source>Vessel&apos;s name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -33,29 +33,29 @@
     <name>MainWindow</name>
     <message>
         <location filename="../MS_Client/MainWindow.ui" line="14"/>
-        <source>MainWindow</source>
+        <source>Monitoring system</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="31"/>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="32"/>
         <source>Such user doesn&apos;t exist</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="31"/>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/UserLoginDlg.cpp" line="32"/>
         <source>Incorrect login or password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp" line="28"/>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp" line="29"/>
         <source>Denied</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp" line="28"/>
+        <location filename="../MS_Client/Dialogs/UserDataHandler/AccountCreationDlg.cpp" line="29"/>
         <source>User with the same login exists</source>
         <translation type="unfinished"></translation>
     </message>
