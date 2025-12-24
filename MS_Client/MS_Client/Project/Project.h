@@ -18,7 +18,7 @@ public:
     const QMap<int, QGeoCoordinate>& getNearVesselLocations() override;
 
 private:
-    int id_ = -1;                               // Unique data base id for the vessel
+    const int id_ = -1;                         // Unique data base id for the vessel
     QGeoCoordinate currentLocation_;            // Last received location of vessel
     QMap<int, QGeoCoordinate> locations_;       // All locations of near vessels and it's id
 };

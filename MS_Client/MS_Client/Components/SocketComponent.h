@@ -7,7 +7,7 @@ class QGeoCoordinate;
 
 namespace Component {
 // Variables of the server's actions
-enum class ServerActionType : int {
+enum class EServerActionType : int {
     AddNewUser = 0,             // Insert user in database
     CheckUserStatement,         // Check user statement (are login and password correct)
     SetVesselInfo,              // Send geo and meteo data to the server
@@ -37,12 +37,12 @@ signals:
 private slots:
     // Server tools
     void slotReadyRead();
-    void sendToServer(Component::ServerActionType dataType, const QVector<QString>& info);
+    void sendToServer(Component::EServerActionType dataType, const QVector<QString>& info);
 
 private:
     SocketComponent(QObject* parent = nullptr);
 
-    void serverRequest(ServerActionType dataType, const QVector<QString>& info);
+    void serverRequest(EServerActionType dataType, const QVector<QString>& info);
 
     QTcpSocket* socket_ = nullptr;      // Socket which uses to work with server
     QByteArray data_;                   // Array of the data

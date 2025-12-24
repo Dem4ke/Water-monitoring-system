@@ -18,7 +18,7 @@ namespace MS {
 */
 
 // Variables of the server's actions
-enum class ServerActionType : int {
+enum class EServerActionType : int {
     AddNewUser = 0,             // Insert user in database
     CheckUserStatement,         // Check user statement (are login and password correct)
     SetVesselInfo,              // Set geo and meteo data to the data base
@@ -64,8 +64,8 @@ public slots:
     void slotReadyRead();
 
 private:
-    void dataBaseRequest(ServerActionType actionType, const QVector<QString>& info);
-    void sendToClient(ServerActionType actionType, const QVector<QString>& info);
+    void dataBaseRequest(EServerActionType actionType, const QVector<QString>& info);
+    void sendToClient(EServerActionType actionType, const QVector<QString>& info);
 
     // Database tools
     void addUser(const QVector<QString>& info);

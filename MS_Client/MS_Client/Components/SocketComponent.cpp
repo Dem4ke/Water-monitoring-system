@@ -24,12 +24,12 @@ SocketComponent &SocketComponent::Instance() {
 
 // Send to server info about user and request an answer
 void SocketComponent::checkUserStatement(const QVector<QString>& info) {
-    sendToServer(ServerActionType::CheckUserStatement, info);
+    sendToServer(EServerActionType::CheckUserStatement, info);
 }
 
 // Send to server info about user and request to add it into database
 void SocketComponent::addUser(const QVector<QString>& info) {
-    sendToServer(ServerActionType::AddNewUser, info);
+    sendToServer(EServerActionType::AddNewUser, info);
 }
 
 // Send monitoring's data to server
@@ -43,7 +43,7 @@ void SocketComponent::updateVesselData(int id, const QGeoCoordinate& location,
     info.push_back(QString::number(windForce));
     info.push_back(QString::number(waveHeight));
 
-    sendToServer(ServerActionType::SetVesselInfo, info);
+    sendToServer(EServerActionType::SetVesselInfo, info);
 }
 
 // Send request to find nearest vessels in inputted radius to the server
@@ -53,7 +53,7 @@ void SocketComponent::getNearVesselLocations(const QGeoCoordinate& location, flo
     info.push_back(QString::number(location.longitude()));
     info.push_back(QString::number(radius));
 
-    sendToServer(ServerActionType::GetNearLocations, info);
+    sendToServer(EServerActionType::GetNearLocations, info);
 }
 
 void SocketComponent::getVesselData(int vesselIndex, int searchTimeSec) {
@@ -61,7 +61,7 @@ void SocketComponent::getVesselData(int vesselIndex, int searchTimeSec) {
     info.push_back(QString::number(vesselIndex));
     info.push_back(QString::number(searchTimeSec));
 
-    sendToServer(ServerActionType::GetVesselData, info);
+    sendToServer(EServerActionType::GetVesselData, info);
 }
 
 // Handler of a server's messages
@@ -88,7 +88,7 @@ void SocketComponent::slotReadyRead() {
 
             // Write data from server
             QVector<QString> info;
-            ServerActionType actionType;
+            EServerActionType actionType;
 
             input >> actionType>> info;
 
@@ -101,9 +101,9 @@ void SocketComponent::slotReadyRead() {
 }
 
 // Server message handler
-void SocketComponent::serverRequest(ServerActionType actionType, const QVector<QString>& info) {
-    if (actionType == ServerActionType::AddNewUser ||
-        actionType == ServerActionType::CheckUserStatement) {
+void SocketComponent::serverRequest(EServerActionType actionType, const QVector<QString>& info) {
+    if (actionType == EServerActionType::AddNewUser ||
+        actionType == EServerActionType::CheckUserStatement) {
 
         if (info.isEmpty()) {
             return;
@@ -120,7 +120,7 @@ void SocketComponent::serverRequest(ServerActionType actionType, const QVector<Q
 
         emit updateUserStatusRequest(isLogAvalible, vesselId);
     }
-    else if (actionType == ServerActionType::GetNearLocations) {
+    else if (actionType == EServerActionType::GetNearLocations) {
         if (info.isEmpty() || info.size() % 3 != 0) {
             return;
         }
@@ -135,7 +135,7 @@ void SocketComponent::serverRequest(ServerActionType actionType, const QVector<Q
 
         emit updateNearVesselLocationsRequest(locations);
     }
-    else if (actionType == ServerActionType::GetVesselData) {
+    else if (actionType == EServerActionType::GetVesselData) {
         if (info.isEmpty()) {
             return;
         }
@@ -202,7 +202,7 @@ void SocketComponent::serverRequest(ServerActionType actionType, const QVector<Q
 }
 
 // Send information to server
-void SocketComponent::sendToServer(ServerActionType actionType, const QVector<QString>& info) {
+void SocketComponent::sendToServer(EServerActionType actionType, const QVector<QString>& info) {
     data_.clear();
 
     QDataStream out(&data_, QIODevice::WriteOnly);

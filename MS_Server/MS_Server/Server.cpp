@@ -84,7 +84,7 @@ void Server::slotReadyRead() {
 
             // Write data from user
             QVector<QString> info;
-            ServerActionType actionType;
+            EServerActionType actionType;
 
             input >> actionType >> info;
 
@@ -100,11 +100,11 @@ void Server::slotReadyRead() {
 }
 
 // Request to a data base based on action type
-void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>& info) {
+void Server::dataBaseRequest(EServerActionType actionType, const QVector<QString>& info) {
     QVector<QString> answerToClient;
 
     switch (actionType) {
-    case ServerActionType::AddNewUser: {
+    case EServerActionType::AddNewUser: {
         if (info.size() != 3) {
             break;
         }
@@ -119,11 +119,11 @@ void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>
             answerToClient.push_back("1");
             answerToClient.push_back(QString::number(mockInfo_.id));
         }
-        sendToClient(ServerActionType::AddNewUser, answerToClient);
+        sendToClient(EServerActionType::AddNewUser, answerToClient);
         //addUser(info);
         break;
     }
-    case ServerActionType::CheckUserStatement: {
+    case EServerActionType::CheckUserStatement: {
         if (info.size() != 2) {
             break;
         }
@@ -133,11 +133,11 @@ void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>
             answerToClient.push_back("1");
             answerToClient.push_back(QString::number(mockInfo_.id));
         }
-        sendToClient(ServerActionType::CheckUserStatement, answerToClient);
+        sendToClient(EServerActionType::CheckUserStatement, answerToClient);
         //checkUserStatement(info);
         break;
     }
-    case ServerActionType::SetVesselInfo: {
+    case EServerActionType::SetVesselInfo: {
         if (info.size() != 6) {
             break;
         }
@@ -146,7 +146,7 @@ void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>
 
         break;
     }
-    case ServerActionType::GetNearLocations: {
+    case EServerActionType::GetNearLocations: {
         if (info.size() != 3) {
             break;
         }
@@ -267,12 +267,12 @@ void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>
         answerToClient.push_back("-22.76");
         answerToClient.push_back("8.27");
 
-        sendToClient(ServerActionType::GetNearLocations, answerToClient);
+        sendToClient(EServerActionType::GetNearLocations, answerToClient);
         //getNearLocations(info);
 
         break;
     }
-    case ServerActionType::GetVesselData: {
+    case EServerActionType::GetVesselData: {
         if (info.size() != 2) {
             break;
         }
@@ -348,13 +348,13 @@ void Server::dataBaseRequest(ServerActionType actionType, const QVector<QString>
         answerToClient.push_back("10.0");
         answerToClient.push_back("10.2");
 
-        sendToClient(ServerActionType::GetVesselData, answerToClient);
+        sendToClient(EServerActionType::GetVesselData, answerToClient);
         break;
     }
     }
 }
 
-void Server::sendToClient(ServerActionType actionType, const QVector<QString>& output) {
+void Server::sendToClient(EServerActionType actionType, const QVector<QString>& output) {
     data_.clear();
 
     QDataStream out(&data_, QIODevice::WriteOnly);
@@ -400,7 +400,7 @@ void Server::addUser(const QVector<QString>& info) {
         query.exec(insertInDB);
     }
 
-    sendToClient(ServerActionType::AddNewUser, answerToClient);
+    sendToClient(EServerActionType::AddNewUser, answerToClient);
 }
 
 
@@ -429,7 +429,7 @@ void Server::checkUserStatement(const QVector<QString>& info) {
         answerToClient.push_back("0");
     }
 
-    sendToClient(ServerActionType::CheckUserStatement, answerToClient);
+    sendToClient(EServerActionType::CheckUserStatement, answerToClient);
 }
 
 // Add new mesurements to vessel's table
@@ -456,7 +456,7 @@ void Server::getNearLocations(const QVector<QString>& info) {
         answerToClient.push_back("");
     }
 
-    sendToClient(ServerActionType::GetNearLocations, answerToClient);
+    sendToClient(EServerActionType::GetNearLocations, answerToClient);
 }
 
 // Get measurments of vessel by data base index
