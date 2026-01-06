@@ -39,12 +39,12 @@ signals:
 private:
     QQuickWidget* plot_;        // Plot QML
 
-    QVariantList points_;
-    QString plotName_;
+    QVariantList points_;       // Points of plot
+    QString plotName_;          // Name of the plot
 
-    qint64 minTime_ = 0;
-    qint64 maxTime_ = 0;
-    double minValue_ = 0.0;
-    double maxValue_ = 0.0;
+    qint64 minTime_ = 0;        // Minimal value of X axis (time axis)
+    qint64 maxTime_ = 0;        // Maxsimal value of X axis (time axis)
+    double minValue_ = 0.0;     // Minimal value of y axis (value axis)
+    double maxValue_ = 0.0;     // Maximal value of y axis (value axis)
 };
 }
